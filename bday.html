@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sister birthday</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        /* Base Styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #fce1e1 0%, #fef3f6 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            transition: transform 0.1s ease-in-out;
+        }
+        .card {
+            box-shadow: 0 10px 30px rgba(255, 100, 150, 0.2);
+        }
+        .message-content {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        /* ------------------ Animations ------------------ */
+
+        /* P1 - Monkey Jump Effect */
+        @keyframes monkeyJump {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-5px, -5px) rotate(-1deg); }
+            20%, 40%, 60%, 80% { transform: translate(5px, 5px) rotate(1deg); }
+        }
+        .monkey-jump {
+            animation: monkeyJump 0.5s ease-in-out;
+        }
+
+        /* P2 - Candle Flame Animation */
+        @keyframes flicker {
+            0% { opacity: 0.9; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0.9; transform: scale(1); }
+        }
+        .flame {
+            animation: flicker 0.3s infinite alternate;
+            cursor: pointer;
+            transition: opacity 0.3s ease-out;
+        }
+
+        /* P6 - Bouncing Gift Animation */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .bouncing-gift {
+            animation: bounce 1s infinite alternate;
+        }
+
+        /* ------------------ Confetti (P10) ------------------ */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 50;
+        }
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #ffcc00; /* Yellow */
+            opacity: 0;
+            transition: all 0.5s;
+        }
+
+        .pink { background-color: #ff69b4; }
+        .blue { background-color: #3b82f6; }
+        .red { background-color: #ef4444; }
+
+    </style>
+</head>
+<body>
+
+    <div id="confetti-container" class="confetti-container"></div>
+    
+    <!-- Main Application Card -->
+    <div id="card" class="card w-full max-w-lg bg-white rounded-2xl p-6 md:p-10 transition-all duration-300">
+        
+        <h1 id="page-title" class="text-3xl font-extrabold text-pink-600 mb-6 text-center"></h1>
+        
+        <div id="page-content" class="min-h-[250px] flex flex-col items-center justify-center p-4">
+            <!-- Content will be injected here -->
+        </div>
+
+        <div id="control-panel" class="mt-8 text-center">
+            <!-- Buttons will be injected here -->
+        </div>
+        
+    </div>
+
+    <!-- P1 Modal (Initial Pop-up) -->
+    <div id="p1-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm mx-4 text-center">
+            <h2 class="text-2xl font-bold text-pink-500 mb-4">A Birthday Challenge Awaits!</h2>
+            <p id="p1-modal-subtext" class="text-gray-700 mb-6">Click to start your 10-page surprise journey!</p>
+            <div class="flex justify-between space-x-4">
+                <button onclick="handleCancel()" 
+                        class="w-full py-3 px-6 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 transition duration-300">
+                    Cancel (Go back)
+                </button>
+                <button onclick="startJourney()" 
+                        class="w-full py-3 px-6 bg-pink-500 text-white font-semibold rounded-lg hover:bg-pink-600 transition duration-300 shadow-md">
+                    Click to Start
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Global State ---
+        let currentPage = 0; // Starts at 0, moves to 1 after initial modal click
+        const card = document.getElementById('card');
+        const titleElement = document.getElementById('page-title');
+        const contentElement = document.getElementById('page-content');
+        const controlsElement = document.getElementById('control-panel');
+        const p1Modal = document.getElementById('p1-modal');
+        const finalMessage = `
+broooooo 🫶,
+
+Happy birthday, my extraordinary buddy and brother from another mother! It's hard to believe that the guy I once mistook for a senior would become such an irreplaceable part of my life. Our bond, built on countless laughs and unbreakable trust, is a true treasure that I cherish every day.
+
+Your patience and caring nature have been a beacon of support and love, guiding me through thick and thin. I'm truly grateful for your endless affection and the way you balance my overthinking by making fun of silly little things. You always know how to bring a smile to my face, and for that, I'm forever thankful.
+
+On this special day, I wish you all the happiness in the world, along with sab kuch jo tumhara dil chahta hai—may all your dreams come true. Here's to more memories, laughter, and a lifetime of brotherhood!
+
+With love and lots of masti,
+Yours irritating fellow lahari
+        `;
+
+        // --- Utility Functions ---
+
+        /** Simulates the 'monkey jump' effect and locks the cancel option. */
+        function handleCancel() {
+            card.classList.add('monkey-jump');
+            const subtext = document.getElementById('p1-modal-subtext');
+            subtext.innerHTML = '<span class="text-red-500 font-bold">Woah! Only "Continue" works today!</span> The journey must go on! 🐒';
+            
+            // Remove the shake after a brief period
+            setTimeout(() => {
+                card.classList.remove('monkey-jump');
+            }, 500);
+        }
+
+        /** Starts the main presentation from Page 1. */
+        function startJourney() {
+            p1Modal.classList.add('hidden');
+            currentPage = 1;
+            renderPage();
+        }
+
+        /** Progresses to the next page. */
+        function nextPage() {
+            currentPage++;
+            renderPage();
+        }
+
+        /** Generates HTML for the Continue button. */
+        function createContinueButton(text = 'Continue Journey', action = 'nextPage()') {
+            return `
+                <button onclick="${action}" 
+                        class="w-full md:w-auto py-3 px-8 bg-pink-500 text-white font-bold text-lg rounded-full shadow-lg hover:bg-pink-600 transition duration-300 active:scale-95 transform">
+                    ${text}
+                </button>
+            `;
+        }
+
+        // --- Page Logic (Switch/Case) ---
+
+        function renderPage() {
+            titleElement.textContent = `Page ${currentPage} of 10`;
+            contentElement.innerHTML = '';
+            controlsElement.innerHTML = '';
+            
+            switch (currentPage) {
+                case 1:
+                    titleElement.textContent = 'chapter 1: The Decision';
+                    contentElement.innerHTML = `
+                        <p class="text-2xl text-center text-gray-700 font-semibold mb-6">
+                            You chose to continue! Now, let's proceed to the next step.
+                        </p>
+                    `;
+                    controlsElement.innerHTML = createContinueButton('To Page 2: The Celebration');
+                    break;
+
+                case 2:
+                    titleElement.textContent = ' chapter 2: Blow the Candles!';
+                    contentElement.innerHTML = `
+                        <h2 class="text-2xl font-extrabold text-blue-600 mb-4">Welcome my bro, Thameem!</h2>
+                        <p class="text-gray-700 mb-6 text-center">Tap the candle flame to celebrate your birthday!</p>
+                        <!-- Cake SVG with Clickable Candle -->
+                        <div class="relative p-4">
+                            <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Cake Body -->
+                                <rect x="50" y="100" width="100" height="70" rx="10" fill="#fbcfe8"/>
+                                <rect x="40" y="80" width="120" height="20" rx="5" fill="#f472b6"/>
+                                <rect x="30" y="70" width="140" height="10" rx="5" fill="#ec4899"/>
+                                <!-- Candle -->
+                                <rect x="95" y="40" width="10" height="30" fill="#fde047"/>
+                                <!-- Flame (Clickable) -->
+                                <g id="candle-flame" class="flame" onclick="blowCandle()">
+                                    <circle cx="100" cy="40" r="8" fill="#ffeb3b"/>
+                                    <path d="M100 20 L95 40 L105 40 Z" fill="#ff9800"/>
+                                </g>
+                                <!-- Text Decoration -->
+                                <text x="100" y="145" font-family="Inter" font-size="14" fill="#a855f7" text-anchor="middle">Happy Birthday</text>
+                            </svg>
+                        </div>
+                    `;
+                    // Controls are added in blowCandle() after the action
+                    break;
+                
+                case 3:
+                    titleElement.textContent = 'chapter: The Bond';
+                    contentElement.innerHTML = `
+                        <div class="text-center">
+                            <div class="text-6xl mb-4 animate-pulse">🤝</div>
+                            <h2 class="text-2xl font-bold text-purple-600 mb-4">Brotherhood Forever!</h2>
+                            <p class="text-lg text-gray-700">
+                                This small gift represents the fire of our friendship. I hope we continue this amazing brotherhood relationship for a lifetime.
+                            </p>
+                        </div>
+                    `;
+                    controlsElement.innerHTML = createContinueButton('Continue Brotherhood');
+                    break;
+
+                case 4:
+                    titleElement.textContent = 'Page 4: Gratitude';
+                    contentElement.innerHTML = `
+                        <div class="text-center bg-yellow-100 p-8 rounded-xl border-l-4 border-yellow-500 shadow-inner">
+                            <p class="text-3xl font-serif italic text-yellow-700 leading-relaxed">
+                                "Be grateful for this life"
+                            </p>
+                            <p class="mt-4 text-sm text-gray-500">- A reminder to cherish every moment.</p>
+                        </div>
+                    `;
+                    controlsElement.innerHTML = createContinueButton('Got it!');
+                    break;
+
+                case 5:
+                    titleElement.textContent = 'Page 5: My Apologies';
+                    contentElement.innerHTML = `
+                        <div class="text-center">
+                            <div class="text-6xl mb-4">🥺</div>
+                            <h2 class="text-2xl font-bold text-red-500 mb-4">I'm So Sorry, Bro.</h2>
+                            <p class="text-lg text-gray-700 mb-6">
+                                I truly apologize for any hurt I may have caused in the past. Your happiness means everything to me.
+                            </p>
+                            <!-- Cute Image Placeholder (using a cute emoji for reliability) -->
+                            <div class="text-7xl">
+                                🐶
+                            </div>
+                            <p class="text-sm text-gray-500 mt-2">Your cute little buddy saying sorry!</p>
+                        </div>
+                    `;
+                    controlsElement.innerHTML = createContinueButton('Forgiven & Moving On');
+                    break;
+
+                case 6:
+                    titleElement.textContent = 'Page 6: The Fun Box';
+                    contentElement.innerHTML = `
+                        <div class="text-center">
+                            <h2 class="text-2xl font-bold text-green-600 mb-6">A Funny Message Box!</h2>
+                            <p class="text-lg text-gray-700 mb-8">
+                                I have an indirect box for you. Click on the cute, bouncing object below to see what it is!
+                            </p>
+                            <!-- Bouncing Gift Animation -->
+                            <div onclick="nextPage()" class="bouncing-gift cursor-pointer inline-block p-4 bg-purple-200 rounded-full shadow-xl hover:shadow-2xl transition duration-300">
+                                <div class="text-6xl">🎁</div> 
+                            </div>
+                        </div>
+                    `;
+                    // No separate button needed, clicking the gift moves to the next page.
+                    controlsElement.innerHTML = `<p class="mt-4 text-sm text-gray-500">Tap the gift above!</p>`;
+                    break;
+
+                case 7:
+                    titleElement.textContent = 'Page 7: The Mysterious Box';
+                    contentElement.innerHTML = `
+                        <div class="text-center">
+                            <h2 class="text-2xl font-bold text-orange-600 mb-6">What's Inside?</h2>
+                            <p class="text-lg text-gray-700 mb-8">
+                                There is a mysterious box here. Are you curious enough to find out what's inside? Click on it!
+                            </p>
+                            <!-- Mysterious Box -->
+                            <div onclick="nextPage()" class="cursor-pointer inline-block bg-orange-500 p-8 rounded-lg shadow-xl hover:scale-[1.02] transition duration-300 transform">
+                                <div class="text-5xl font-extrabold text-white">?</div>
+                            </div>
+                        </div>
+                    `;
+                    controlsElement.innerHTML = `<p class="mt-4 text-sm text-gray-500">Tap the mysterious box!</p>`;
+                    break;
+
+                case 8:
+                    titleElement.textContent = 'Page 8: Patience Rewarded';
+                    contentElement.innerHTML = `
+                        <div class="text-center">
+                            <h2 class="text-3xl font-extrabold text-teal-600 mb-4">Thank You for Being Patient!</h2>
+                            <p class="text-lg text-gray-700 mb-8">
+                                You've reached the final stretch! Your patience deserves a big reward. There is a special letter waiting for you.
+                            </p>
+                        </div>
+                    `;
+                    controlsElement.innerHTML = createContinueButton('Open Special Letter', 'nextPage()');
+                    break;
+
+                case 9:
+                    titleElement.textContent = 'Page 9: The Birthday Letter';
+                    contentElement.innerHTML = `
+                        <div class="bg-yellow-50 p-6 rounded-lg shadow-inner w-full max-w-md mx-auto h-auto overflow-y-scroll max-h-[300px]">
+                            <p class="text-gray-800 text-sm message-content leading-relaxed">
+                                <span class="font-bold text-pink-600">My Dear Thameem,</span>
+                                <br><br>
+                                I  know you never believe this but it always been very special for me so please accept me as a beautiful gift from God and but please read these words as my heartfelt letter to you.
+                                <br><br>
+                                ${finalMessage.trim().replace(/\n/g, '<br>')}
+                            </p>
+                        </div>
+                        <p class="mt-6 text-xl font-semibold text-gray-700">Yours lovingly...</p>
+                        <p class="text-sm text-gray-500">Tap the circle to continue to your final message!</p>
+                        <!-- Tap Circle -->
+                        <div onclick="nextPage()" class="mt-4 w-12 h-12 bg-red-500 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:shadow-xl transition duration-300 animate-pulse">
+                            <span class="text-xl text-white">❤️</span>
+                        </div>
+                    `;
+                    break;
+
+                case 10:
+                    titleElement.textContent = '🎉 Page 10: The GRAND FINALE! 🎉';
+                    contentElement.innerHTML = `
+                        <h2 class="text-4xl font-extrabold text-purple-600 mb-6 text-center">HAPPY BIRTHDAY,!</h2>
+                        <div class="bg-purple-100 p-6 rounded-xl shadow-inner w-full max-w-md mx-auto">
+                            <p class="text-gray-800 text-base message-content leading-relaxed">
+                                ${finalMessage.trim().replace(/\n/g, '<br><br>')}
+                            </p>
+                        </div>
+                        <p class="mt-6 text-xl text-pink-500 font-bold">Hope you loved this surprise, my !</p>
+                        <p class="text-xs text-gray-400 mt-2">
+                           (Pretend this is playing a happy birthday song and party bombs are blasting! 🥳)
+                        </p>
+                    `;
+                    controlsElement.innerHTML = '';
+                    
+                    // Final page actions: Confetti and Style change
+                    card.classList.add('border-8', 'border-purple-500');
+                    titleElement.classList.remove('text-pink-600');
+                    titleElement.classList.add('text-purple-600');
+                    launchConfetti();
+
+                    // Optional: Play a simple sound (requires Web Audio API knowledge which is complex for a simple birthday wish)
+                    // If you wanted to add sound, this is where you'd use new Audio('url').play();
+                    break;
+            }
+        }
+
+        // --- P2 Candle Blow Logic ---
+
+        function blowCandle() {
+            const flame = document.getElementById('candle-flame');
+            if (flame) {
+                // Extinguish the flame visually
+                flame.style.opacity = 0;
+                flame.classList.remove('flame');
+                
+                // Add a small "puff" effect (using emoji text)
+                contentElement.insertAdjacentHTML('beforeend', '<div id="puff" class="text-3xl mt-4 animate-out fade-out duration-1000">💨</div>');
+                
+                // Add the continue button after the action
+                controlsElement.innerHTML = createContinueButton('Continue');
+            }
+        }
+
+        // --- P10 Confetti Logic ---
+
+        function createConfettiPiece(colorClass, x, y, duration) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti ' + colorClass;
+            confetti.style.left = x + 'px';
+            confetti.style.top = y + 'px';
+            confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+            document.getElementById('confetti-container').appendChild(confetti);
+
+            setTimeout(() => {
+                confetti.style.opacity = 1;
+                // Animate downward and slightly sideways
+                confetti.style.transform = `translateY(${window.innerHeight * 1.5}px) translateX(${Math.random() * 200 - 100}px) rotate(${Math.random() * 720}deg) scale(0.5)`;
+                confetti.style.transition = `transform ${duration}ms linear, opacity ${duration / 2}ms ease-out`;
+            }, 10);
+            
+            // Cleanup
+            setTimeout(() => confetti.remove(), duration + 100);
+        }
+
+        function launchConfetti() {
+            const colors = ['pink', 'blue', 'red', 'yellow'];
+            for (let i = 0; i < 100; i++) {
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const x = Math.random() * window.innerWidth;
+                const y = -10; // Start above the viewport
+                const duration = 2000 + Math.random() * 2000;
+                createConfettiPiece(color, x, y, duration);
+            }
+        }
+
+
+        // The modal is visible by default (Page 0). The journey starts when the modal is closed.
+        // No need to call renderPage() on load, as the modal handles the start.
+    </script>
+
+</body>
+</html>
